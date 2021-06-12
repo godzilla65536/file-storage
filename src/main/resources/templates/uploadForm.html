@@ -1,0 +1,47 @@
+<html xmlns:th="https://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+<body>
+
+<div th:if="${message}">
+  <h2>
+    <span th:text="${message}"></span>
+    <span style="color: blue; "><span th:text="${fileName}"></span></span>
+  </h2>
+</div>
+
+<div>
+  <form method="POST" enctype="multipart/form-data" action="/">
+    <table>
+      <tr>
+        <td>File to upload:</td>
+        <td><input type="file" name="file"/></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><input type="submit" value="Upload"/></td>
+      </tr>
+    </table>
+  </form>
+</div>
+
+<div>
+  <table border="1">
+    <thead>
+    <th>Имя файла</th>
+    <th>Размер</th>
+    <th>Загружено</th>
+    <th>Действия</th>
+    </th>
+    </thead>
+    <tbody>
+    <tr th:each="file : ${filesInfo}">
+      <td><a th:href="${'/file/' + file.id}" th:text="${file.title}"/></td>
+      <td th:text="${#numbers.formatDecimal((0.0 + file.length)/1024/1024, 1, 2)}+' MB'"></td>
+      <td th:text="${file.uploaded}"></td>
+      <td><a th:href="${'/file/delete/' + file.id}" th:text="Удалить"/></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>
