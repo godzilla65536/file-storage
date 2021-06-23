@@ -7,18 +7,42 @@ import org.springframework.data.mongodb.gridfs.GridFsOperations
 import org.springframework.data.mongodb.gridfs.GridFsTemplate
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument
+import org.telegram.telegrambots.meta.api.objects.InputFile
 import ru.godzilla65536.filestorage.model.File
+import ru.godzilla65536.filestorage.telegram.TelegramBot
+import ru.godzilla65536.filestorage.telegram.TelegramBotProps
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Service
 class StorageService(
     private val gridFsTemplate: GridFsTemplate,
-    private val operations: GridFsOperations
+    private val operations: GridFsOperations,
+    private val bot: TelegramBot,
+    private val telegramBotProps: TelegramBotProps
 ) {
 
     fun addFile(file: MultipartFile) {
         gridFsTemplate.store(file.inputStream, file.originalFilename!!)
+
+        val inputFile = InputFile(file.inputStream, file.originalFilename)
+        val sendDocument = SendDocument(
+            telegramBotProps.chatId,
+            inputFile,
+            "Добавлен новый файл!",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+        )
+
+        println("Sending file to telegram chat...")
+        bot.execute(sendDocument)
     }
 
     fun getFile(fileId: String): File {

@@ -2,12 +2,12 @@ version: '3.9'
 services:
   mongo:
     image: mongo
-    container_name: mongo
+    container_name: file_storage_mongo
     ports:
       - 27017:27017
   file_storage:
     image: godzilla65536/file_storage
-    container_name: file_storage
+    container_name: file_storage_service
     depends_on:
       - mongo
     build:
@@ -18,3 +18,4 @@ services:
       - MONGODB_HOST=mongo
       - MONGODB_PORT=27017
       - MONGODB_DATABASE=file_storage
+      - FILE_STORAGE_TELEGRAM_BOT_TOKEN=${FILE_STORAGE_TELEGRAM_BOT_TOKEN}

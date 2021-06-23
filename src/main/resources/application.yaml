@@ -8,3 +8,8 @@ spring:
       host: ${MONGODB_HOST:localhost}
       port: ${MONGODB_PORT:27017}
       database: ${MONGODB_DATABASE:file_storage}
+
+telegram:
+  bot:
+    token: ${FILE_STORAGE_TELEGRAM_BOT_TOKEN}
+    chat-id: -1001549236984
