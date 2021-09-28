@@ -16,6 +16,4 @@ class TelegramBot(
     override fun onUpdateReceived(update: Update) {
     }
 
-
-
 }
