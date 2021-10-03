@@ -1,8 +1,4 @@
 spring:
-  servlet:
-    multipart:
-      max-file-size: 500MB
-      max-request-size: 500MB
   data:
     mongodb:
       host: ${MONGODB_HOST:localhost}
@@ -11,5 +7,11 @@ spring:
 
 telegram:
   bot:
-    token: ${FILE_STORAGE_TELEGRAM_BOT_TOKEN}
+    token: ${TELEGRAM_BOT_TOKEN}
     chat-id: -1001549236984
+    enabled: ${TELEGRAM_BOT_ENABLED}
+
+springdoc:
+  swagger-ui:
+    path: /swagger
+    disable-swagger-default-url: true
