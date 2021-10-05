@@ -4,7 +4,6 @@ import com.mongodb.client.gridfs.model.GridFSFile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitLast
-import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
@@ -17,7 +16,7 @@ import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
-import ru.godzilla65536.filestorage.api.dto.FileContent
+import ru.godzilla65536.filestorage.api.dto.File
 import ru.godzilla65536.filestorage.api.dto.FileProps
 import ru.godzilla65536.filestorage.telegram.Bot
 import java.time.ZoneId
@@ -46,10 +45,14 @@ class StorageService(
             }.asFlow()
 
     suspend fun addFile(filePart: FilePart) {
-        gridFsTemplate.store(filePart.content(), filePart.filename()).awaitSingle()
+        val fileId = gridFsTemplate
+            .store(filePart.content(), filePart.filename())
+            .map { it.toString() }
+            .awaitSingle()
+        val fileData = getFileData(findById(fileId))
         mono {
             telegramBot.notifyAboutAddingFile(
-                filePart.content().awaitLast().asInputStream(),
+                fileData.inputStream(),
                 filePart.filename()
             )
         }.subscribe()
@@ -60,17 +63,11 @@ class StorageService(
     *  Возможно стоит возвращать Resource. А имя файла запрашивать отдельным методом. Мне кажется сейчас браузер
     *  загружает файлы полностью в оперативную память
     */
-    suspend fun getFile(fileId: String): Mono<FileContent> {
-        val gridFsResource = gridFsTemplate
-            .findOne(Query(Criteria.where(ID).`is`(ObjectId(fileId))))
-            .flatMap(gridFsTemplate::getResource)
-            .awaitSingle()
-        val byteArray = gridFsResource.content
-            .map { it.asByteBuffer().array() }
-            .reduce { b1, b2 -> b1 + b2 }
-            .awaitLast()
+    suspend fun getFile(fileId: String): Mono<File> {
+        val gridFsResource = findById(fileId)
+        val byteArray = getFileData(gridFsResource)
         return gridFsResource.gridFSFile.map {
-            FileContent(
+            File(
                 name = it.filename,
                 base64Content = Base64.encodeBase64String(byteArray)
             )
@@ -80,6 +77,18 @@ class StorageService(
     suspend fun deleteFile(fileId: String) {
         gridFsTemplate.delete(Query(Criteria.where(ID).`is`(ObjectId(fileId)))).awaitSingleOrNull()
     }
+
+    private suspend fun findById(fileId: String) =
+        gridFsTemplate
+            .findOne(Query(Criteria.where(ID).`is`(ObjectId(fileId))))
+            .flatMap(gridFsTemplate::getResource)
+            .awaitSingle()
+
+    private suspend fun getFileData(gridFsResource: ReactiveGridFsResource) =
+        gridFsResource.content
+            .map { it.asByteBuffer().array() }
+            .reduce { b1, b2 -> b1 + b2 }
+            .awaitLast()
 
     companion object {
         const val ID = "_id"

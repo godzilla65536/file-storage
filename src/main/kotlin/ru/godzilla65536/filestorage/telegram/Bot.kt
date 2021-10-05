@@ -12,6 +12,8 @@ class Bot(
     private val props: BotProps
 ) : TelegramLongPollingBot() {
 
+    // TODO: 03.10.2021 Сообщать в консоли о состоянии бота (включён/выключен)
+
     override fun getBotToken() = props.token
 
     override fun getBotUsername() = "noName :)"
@@ -45,6 +47,7 @@ class Bot(
             println("File '$filename' successfully sent!")
         } catch (e: Exception) {
             println("Something happens with file '$filename' :(")
+            e.printStackTrace()
         }
     }
 

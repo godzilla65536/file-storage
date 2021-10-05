@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import org.springframework.http.MediaType
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
-import ru.godzilla65536.filestorage.api.dto.FileContent
+import ru.godzilla65536.filestorage.api.dto.File
 import ru.godzilla65536.filestorage.api.dto.FileProps
 
 @Tag(name = "File Storage")
@@ -19,7 +19,7 @@ interface FileStorageApi {
     suspend fun uploadFile(@RequestPart("file") filePart: FilePart)
 
     @GetMapping("download/{fileId}")
-    suspend fun downloadFile(@PathVariable fileId: String): FileContent
+    suspend fun downloadFile(@PathVariable fileId: String): File
 
     @DeleteMapping("delete/{fileId}")
     suspend fun deleteFile(@PathVariable fileId: String)

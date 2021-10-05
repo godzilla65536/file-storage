@@ -1,0 +1,40 @@
+---
+
+- hosts: server-group
+  gather_facts: no
+  vars:
+    remote_path: /apps/file-storage
+    application_path: ./../target/file-storage.jar
+    docker_compose_path: ./../docker-compose.yaml
+  tasks:
+    - name: Create a directory for application
+      ansible.builtin.file:
+        path: '{{ remote_path }}'
+        state: directory
+        mode: '0755'
+
+    - name: Copy 'file-storage.jar' to remote server
+      copy:
+        src: '{{ application_path }}'
+        dest: '{{ remote_path }}'
+
+    - name: Create 'Dockerfile'
+      copy:
+        dest: '{{ remote_path }}/Dockerfile'
+        content: |
+          FROM openjdk:11
+          EXPOSE 8080
+          COPY ./file-storage.jar file-storage.jar
+          ENTRYPOINT java -jar file-storage.jar
+
+    - name: Copy 'docker-compose.yaml' to remote server
+      copy:
+        src: '{{ docker_compose_path }}'
+        dest: '{{ remote_path }}'
+
+    - name: Run command 'docker-compose build'
+      command: 'docker-compose -f {{ remote_path }}/docker-compose.yaml build'
+
+    - name: Run command 'docker-compose up'
+      command: 'docker-compose -f {{ remote_path }}/docker-compose.yaml up -d'
+  become: yes
