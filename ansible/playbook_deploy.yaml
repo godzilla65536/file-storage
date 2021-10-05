@@ -1,6 +1,6 @@
 ---
 
-- hosts: server-group
+- hosts: server_group
   gather_facts: no
   vars:
     remote_path: /apps/file-storage

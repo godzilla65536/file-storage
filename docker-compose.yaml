@@ -5,6 +5,9 @@ services:
     container_name: file-storage-mongo
     ports:
       - '27017:27017'
+    deploy:
+      restart_policy:
+        condition: any
   file_storage:
     build: .
     image: file-storage
@@ -18,3 +21,6 @@ services:
       - TELEGRAM_BOT_TOKEN=<token>
       - TELEGRAM_CHAT_ID=<chat_id>
       - TELEGRAM_BOT_ENABLED=true
+    deploy:
+      restart_policy:
+        condition: any
